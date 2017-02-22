@@ -11,11 +11,11 @@ from mysql2bq.mysql2json import JsonExport
 @click.option('-p', '--password', default='', help='MySQL password')
 @click.option('-t', '--table', required=True, help='MySQL table')
 @click.option('-c', '--compress', is_flag=True, default=True, help='compress output')
+@click.option('--tmpdir', default='/tmp', help='workingdirectory')
 @click.pass_context
-def migrate(ctx, host, database, user, password, table, compress):
-    path = '.' #tempfile.mkstemp
-    tmp_outfile = '%s/%s-%s-schema.json' % (path, database, table)
-    tmp_datafile = '%s/%s-%s-data' % (path, database, table)
+def migrate(ctx, host, database, user, password, table, compress, tmpdir):
+    tmp_outfile = '%s/%s-%s-schema.json' % (tmpdir, database, table)
+    tmp_datafile = '%s/%s-%s-data' % (tmpdir, database, table)
 
     print("save schema to " + tmp_outfile)
     ctx.invoke(BuildSchema, host=host, database=database, user=user, password=password, table=table, filename=tmp_outfile)
