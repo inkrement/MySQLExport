@@ -4,7 +4,7 @@ import MySQLdb
 import click
 from MySQLdb.converters import conversions
 import MySQLdb.cursors
-import json, gzip
+import ujson, gzip, io
 
 def conv_date_to_timestamp(str_date):
     import time
@@ -54,11 +54,11 @@ def JsonExport(host, database, user, password, table, split, compress, prefix):
         if count % split == 0:
             if dest: dest.close()
             if compress:
-                dest = gzip.open(genFilename(prefix, at, 'json.gz'), 'wt')
+                dest = io.TextIOWrapper(gzip.open(genFilename(prefix, at, 'json.gz'), 'wb'), encoding='utf-8')
             else:
                 dest = open(genFilename(prefix, at, 'json'), 'w')
             at += 1
-        dest.write(json.dumps(row) + "\n")
+        dest.write(ujson.dumps(row) + "\n")
         count += 1
     if dest: dest.close()
 
