@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+import click
+from mysql2bq.mysql2bqSchema import BuildSchema
+from mysql2bq.mysql2json import JsonExport
+
+@click.command()
+@click.option('-h', '--host', default='127.0.0.1', help='MySQL hostname')
+@click.option('-d', '--database', required=True, help='MySQL database')
+@click.option('-u', '--user', default='root', help='MySQL user')
+@click.option('-p', '--password', default='', help='MySQL password')
+@click.option('-t', '--table', required=True, help='MySQL table')
+@click.option('-c', '--compress', is_flag=True, default=True, help='compress output')
+@click.pass_context
+def migrate(ctx, host, database, user, password, table, compress):
+    path = '.' #tempfile.mkstemp
+    tmp_outfile = '%s/%s-%s-schema.json' % (path, database, table)
+    tmp_datafile = '%s/%s-%s-data' % (path, database, table)
+
+    print("save schema to " + tmp_outfile)
+    ctx.invoke(BuildSchema, host=host, database=database, user=user, password=password, table=table, filename=tmp_outfile)
+
+    print("export content to " + tmp_datafile)
+    ctx.invoke(JsonExport, host=host, database=database, user=user, password=password, table=table, prefix=tmp_datafile, compress=compress)
+
+if __name__ == '__main__':
+    ## run the command
+    migrate()
