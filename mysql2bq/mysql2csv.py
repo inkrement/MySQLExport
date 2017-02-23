@@ -11,9 +11,10 @@ def conv_date_to_timestamp(str_date):
     import datetime
 
     date_time = MySQLdb.times.DateTime_or_None(str_date)
-    unix_timestamp = (date_time - datetime.datetime(1970,1,1)).total_seconds()
+    #unix_timestamp = int((date_time - datetime.datetime(1970,1,1)).total_seconds())
 
-    return unix_timestamp
+    #return unix_timestamp
+    return int(time.mktime(date_time.timetuple()))
 
 def Connect(host, database, user, password):
     ## fix conversion. datetime as str and not datetime object
@@ -57,7 +58,7 @@ def CSVExport(host, database, user, password, table, split, compress, prefix):
         if count % split == 0:
             if dest: dest.close()
             if compress:
-                dest = csv.writer(gzip.open(genFilename(prefix, at, 'csv.gz'), 'wt'))
+                dest = csv.writer(gzip.open(genFilename(prefix, at, 'csv.gz'), 'wt'), quoting=csv.QUOTE_NONNUMERIC)
             else:
                 #todo
                 dest = csv.writer(open(genFilename(prefix, at, 'csv'), 'wt'))
@@ -74,7 +75,7 @@ def CSVExport(host, database, user, password, table, split, compress, prefix):
 
         # append
         count += 1
-        batch.append(row + ("\"",))
+        batch.append(row)
 
 if __name__ == '__main__':
     ## run the command

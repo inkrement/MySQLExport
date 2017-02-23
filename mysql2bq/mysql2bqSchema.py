@@ -51,7 +51,7 @@ def BuildSchema(host, database, user, password, table, filename):
         schema.append(field)
 
     with open(filename, 'w') as fp:
-        json.dump(schema, fp)
+        json.dump(schema, fp, indent=4)
 
 
 
