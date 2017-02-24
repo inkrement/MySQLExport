@@ -56,7 +56,6 @@ def CSVExport(host, database, user, password, table, split, compress, prefix):
 
     for row in cursor:
         if count % split == 0:
-            if dest: dest.close()
             if compress:
                 dest = csv.writer(gzip.open(genFilename(prefix, at, 'csv.gz'), 'wt'), quoting=csv.QUOTE_NONNUMERIC)
             else:
