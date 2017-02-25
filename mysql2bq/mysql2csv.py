@@ -4,7 +4,7 @@ import MySQLdb
 import click
 from MySQLdb.converters import conversions
 import MySQLdb.cursors
-import gzip, csv
+import csv, sys
 
 def conv_date_to_timestamp(str_date):
     import time
@@ -33,48 +33,17 @@ def genFilename(prefix, num, ext):
 @click.option('-u', '--user', default='root', help='MySQL user')
 @click.option('-p', '--password', default='', help='MySQL password')
 @click.option('-t', '--table', required=True, help='MySQL table')
-@click.option('-s', '--split', default=4000000, help='split output')
-@click.option('-c', '--compress', is_flag=True, default=False, help='compress output')
-@click.argument('prefix')
-def CSVExport(host, database, user, password, table, split, compress, prefix):
+def CSVExport(host, database, user, password, table):
     conn = Connect(host, database, user, password)
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM %s" % (table))
 
-    ''' without splitting file:
-    with open(filename, "w") as writer:
-        for row in cursor:
-            writer.write(json.dumps(row) + "\n")
-    '''
-
-    count = 0
-    at = 0
-    dest = None
-    batchsize = 1000
-    batch = []
+    csvwriter = csv.writer(sys.stdout, quoting=csv.QUOTE_NONNUMERIC)
 
     for row in cursor:
-        if count % split == 0:
-            if compress:
-                dest = csv.writer(gzip.open(genFilename(prefix, at, 'csv.gz'), 'wt'), quoting=csv.QUOTE_NONNUMERIC)
-            else:
-                #todo
-                dest = csv.writer(open(genFilename(prefix, at, 'csv'), 'wt'))
-            at += 1
+        _= csvwriter.writerow(row)
 
-            ## write out
-            _= dest.writerows(batch)
-            batch = []
-
-        # write out
-        if count % batchsize == 0:
-            _= dest.writerows(batch)
-            batch = []
-
-        # append
-        count += 1
-        batch.append(row)
 
 if __name__ == '__main__':
     ## run the command
